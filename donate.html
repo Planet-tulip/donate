@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Omise Payment</title>
+    <script src="https://cdn.omise.co/omise.js"></script>
+</head>
+<body>
+    <h1>Payment Form</h1>
+    <form id="payment-form">
+        <label for="name">Name on Card</label><br>
+        <input type="text" id="name" value="Test Card" readonly /><br><br>
+        
+        <label for="number">Card Number</label><br>
+        <input type="text" id="number" value="4242424242424242" readonly /><br><br>
+        
+        <label for="expiration_month">Expiration Month</label><br>
+        <input type="text" id="expiration_month" value="12" readonly /><br><br>
+        
+        <label for="expiration_year">Expiration Year</label><br>
+        <input type="text" id="expiration_year" value="2024" readonly /><br><br>
+        
+        <label for="security_code">Security Code</label><br>
+        <input type="text" id="security_code" value="123" readonly /><br><br>
+        
+        <button type="submit">Pay</button>
+    </form>
+
+    <script>
+        Omise.setPublicKey('pkey_test_60x1r6to3kquh9ltquj');  // เปลี่ยนเป็น public key ของคุณ
+
+        document.getElementById('payment-form').onsubmit = function(event) {
+            event.preventDefault();
+
+            var data = {
+                name: document.getElementById('name').value,
+                number: document.getElementById('number').value,
+                expiration_month: document.getElementById('expiration_month').value,
+                expiration_year: document.getElementById('expiration_year').value,
+                security_code: document.getElementById('security_code').value
+            };
+
+            Omise.createToken('card', data, function(statusCode, response) {
+                if (response.object === 'token') {
+                    // ส่ง token ไปยังเซิร์ฟเวอร์
+                    fetch('/charge', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ token_id: response.id })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        alert('Payment successful!');
+                        console.log('Success:', data);
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+                } else {
+                    console.error('Error creating token:', response.message);
+                }
+            });
+        };
+    </script>
+</body>
+</html>
