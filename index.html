@@ -4,59 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OAuth Redirect</title>
-    <script>
-        // ฟังก์ชันเพื่อดึง Authorization Code จาก URL
-        function getAuthorizationCode() {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('code');
-        }
-
-        // ฟังก์ชันแลกเปลี่ยน Authorization Code เป็น Access Token
-        async function exchangeCodeForToken(code) {
-            const url = 'https://streamlabs.com/api/v2.0/token';
-            const payload = {
-                grant_type: 'authorization_code',
-                client_id: '9cea4969-a3ed-44ea-8e3e-c1ac0360963a',
-                client_secret: '3XAzlvl3gxCp8zGhTbq9j700360owJlH0lJULJw9',
-                redirect_uri: 'https://planet-tulip.github.io/donate/',
-                code: code
-            };
-
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify(payload)
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                console.log('Access Token:', data.access_token);
-                document.getElementById('result').textContent = 'Access Token: ' + data.access_token;
-            } else {
-                const errorData = await response.json();
-                console.error('Error:', errorData);
-                document.getElementById('result').textContent = 'Error: ' + errorData.error;
-            }
-        }
-
-        // เรียกใช้ฟังก์ชันเมื่อโหลดหน้า
-        window.onload = async () => {
-            const authorizationCode = getAuthorizationCode();
-            if (authorizationCode) {
-                try {
-                    await exchangeCodeForToken(authorizationCode);
-                } catch (error) {
-                    console.error('Error exchanging code for token:', error);
-                    document.getElementById('result').textContent = 'Error exchanging code for token.';
-                }
-            } else {
-                document.getElementById('result').textContent = 'No authorization code found.';
-            }
-        };
-    </script>
+    
 </head>
 <body>
     <h1>OAuth Redirect</h1>
