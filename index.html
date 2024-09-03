@@ -13,36 +13,40 @@
 
         // ฟังก์ชันแลกเปลี่ยน Authorization Code เป็น Access Token
         async function exchangeCodeForToken(code) {
-            const response = await fetch('https://streamlabs.com/api/v2.0/token', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    grant_type: 'authorization_code',
-                    client_id: '9cea4969-a3ed-44ea-8e3e-c1ac0360963a',
-                    client_secret: '3XAzlvl3gxCp8zGhTbq9j700360owJlH0lJULJw9',
-                    redirect_uri: 'https://planet-tulip.github.io/donate/',
-                    code: code,
-                }),
-            });
+            try {
+                const response = await fetch('https://streamlabs.com/api/v2.0/token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        grant_type: 'authorization_code',
+                        client_id: '9cea4969-a3ed-44ea-8e3e-c1ac0360963a',  // ใช้ client_id ของคุณ
+                        client_secret: '3XAzlvl3gxCp8zGhTbq9j700360owJlH0lJULJw9',  // ใช้ client_secret ของคุณ
+                        redirect_uri: 'https://planet-tulip.github.io/donate/',  // ต้องตรงกับที่ตั้งค่าใน Streamlabs
+                        code: code,
+                    }),
+                });
 
-            const data = await response.json();
-            return data;
+                const data = await response.json();
+                console.log('Response Data:', data);
+
+                if (response.ok) {
+                    document.getElementById('result').textContent = 'Access Token: ' + data.access_token;
+                } else {
+                    throw new Error(data.error_description || 'Error exchanging code for token.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result').textContent = 'Error: ' + error.message;
+            }
         }
 
         // เรียกใช้ฟังก์ชันเมื่อโหลดหน้า
         window.onload = async () => {
             const authorizationCode = getAuthorizationCode();
             if (authorizationCode) {
-                try {
-                    const data = await exchangeCodeForToken(authorizationCode);
-                    console.log('Access Token:', data.access_token);
-                    document.getElementById('result').textContent = 'Access Token: ' + data.access_token;
-                } catch (error) {
-                    console.error('Error exchanging code for token:', error);
-                    document.getElementById('result').textContent = 'Error exchanging code for token.';
-                }
+                await exchangeCodeForToken(authorizationCode);
             } else {
                 document.getElementById('result').textContent = 'No authorization code found.';
             }
