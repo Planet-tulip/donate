@@ -3,11 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OAuth Redirect</title>
-    
+    <title>Streamlabs OAuth via JavaScript</title>
 </head>
 <body>
-    <h1>OAuth Redirect</h1>
-    <p id="result">Processing...</p>
+    <h1>Streamlabs OAuth Integration with JavaScript</h1>
+    <button id="loginBtn">Login with Streamlabs</button>
+
+    <div id="result"></div>
+
+    <script>
+        const clientId = 'YOUR_CLIENT_ID';
+        const redirectUri = window.location.origin + window.location.pathname; // ใช้ URL เดียวกันสำหรับการ redirect กลับ
+        const scope = 'donations.read+alerts.create'; // ตัวอย่าง scope
+
+        const loginBtn = document.getElementById('loginBtn');
+
+        loginBtn.addEventListener('click', () => {
+            // เปลี่ยนเส้นทางไปยังหน้าล็อกอินของ Streamlabs
+            const authUrl = `https://streamlabs.com/api/v2.0/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=${scope}`;
+            window.location.href = authUrl;
+        });
+
+        // ตรวจสอบว่ามี access_token อยู่ใน URL หรือไม่
+        window.onload = function () {
+            const hash = window.location.hash;
+            if (hash) {
+                const params = new URLSearchParams(hash.substring(1)); // ลบเครื่องหมาย # ออก
+                const accessToken = params.get('access_token');
+
+                if (accessToken) {
+                    document.getElementById('result').innerHTML = `<p>Access Token: ${accessToken}</p>`;
+                    // ใช้ Access Token เรียก API
+                    fetch('https://streamlabs.com/api/v2.0/user', {
+                        headers: {
+                            'Authorization': `Bearer ${accessToken}`,
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('result').innerHTML += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+            }
+        };
+    </script>
 </body>
 </html>
